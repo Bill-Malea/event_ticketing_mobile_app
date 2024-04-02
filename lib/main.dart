@@ -1,9 +1,17 @@
-import 'package:event_ticketing_mobile_app/models/event_model.dart';
-import 'package:event_ticketing_mobile_app/screens/homepage.dart';
+import 'package:event_ticketing_mobile_app/provider/nav_bar.dart';
+import 'package:event_ticketing_mobile_app/screens/homescreen/homepage.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const UserApp());
+  runApp(MultiProvider(
+      key: ObjectKey(DateTime.now().toString()),
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => NavProvider(),
+        ),
+      ],
+      child: const UserApp()));
 }
 
 class UserApp extends StatelessWidget {
@@ -18,7 +26,23 @@ class UserApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.black),
       ),
-      home: const HomePage(),
+      home: HomeScreen(),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
+
+  final List<Widget> pages = [
+    const HomePage(),
+  ];
+  @override
+  Widget build(BuildContext context) {
+    final selectedpage = Provider.of<NavProvider>(context).selectetab;
+    return Scaffold(
+      appBar: selectedpage == 1 ? null : AppBar(),
+      body: Center(child: pages.elementAt(selectedpage)),
     );
   }
 }
