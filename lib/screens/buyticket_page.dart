@@ -1,9 +1,19 @@
+import 'dart:async';
+
+import 'package:event_ticketing_mobile_app/models/event_model.dart';
 import 'package:event_ticketing_mobile_app/models/ticket_model.dart';
+import 'package:event_ticketing_mobile_app/provider/auth.dart';
+import 'package:event_ticketing_mobile_app/provider/mpesa.dart';
+import 'package:event_ticketing_mobile_app/screens/login/SignupPage.dart';
 import 'package:event_ticketing_mobile_app/screens/ticket_receipt_page.dart';
+import 'package:event_ticketing_mobile_app/utilities/formfield_widg.dart';
+import 'package:event_ticketing_mobile_app/utilities/toast_util.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BuyTicketPage extends StatefulWidget {
-  const BuyTicketPage({super.key});
+  final EventModel event;
+  const BuyTicketPage({super.key, required this.event});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -13,8 +23,44 @@ class BuyTicketPage extends StatefulWidget {
 class _BuyTicketPageState extends State<BuyTicketPage> {
   int selectedFanZone = 0;
 
+  var _phoneNumber = "";
   bool checkAvailability(int fanZone) {
     return true;
+  }
+
+  Timer? _timer;
+  var isLoading = false;
+
+  Future<void> makePayment(String phoneNumber, int amount) async {
+    final paymentProvider =
+        Provider.of<PaymentProvider>(context, listen: false);
+    setState(() {
+      isLoading = true;
+    });
+
+    var checkoutRequestID =
+        await paymentProvider.initiatePayment(phoneNumber, amount);
+
+    var paymentStatus;
+
+    if (checkoutRequestID != null) {
+      _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
+        try {
+          final result =
+              await paymentProvider.checkPaymentStatus(checkoutRequestID);
+
+          if (result != null) {
+            paymentStatus = result;
+            setState(() {});
+            if (paymentStatus['ResultCode'] != null) {
+              _timer!.cancel();
+            }
+          }
+        } catch (error) {
+          errortoast(error.toString());
+        }
+      });
+    }
   }
 
   void buyTicket() {
@@ -33,6 +79,7 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
         return StatefulBuilder(
           builder: (context, setState) {
             return Container(
+              height: 600,
               padding: const EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -42,39 +89,76 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
                     'Selected Fan Zone: FanZone $selectedFanZone',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
+                  Row(
+                    children: [
+                      Radio<bool>(
+                        value: true,
+                        groupValue: true,
+                        onChanged: (val) {
+                          setState(() {});
+                        },
+                      ),
+                      Image.asset(
+                        'assets/images/mpesa.png',
+                        width: 80,
+                        height: 50,
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 16),
-                  Text('Price: \$${price.toString()}'),
+                  Text(' Ticket Price: ${price.toString()}'),
                   const SizedBox(height: 16),
-                  const TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Enter Phone Number',
-                      labelText: 'Phone Number',
-                    ),
+                  FormInputField(
+                    labelText: 'PhoneNumber',
+                    onchanged: (value) {
+                      setState(() {
+                        _phoneNumber = value!;
+                      });
+                    },
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Please enter a phone number';
+                      }
+
+                      final phoneRegex = RegExp(r'^[0-9]{10}$');
+
+                      if (!phoneRegex.hasMatch(value)) {
+                        return 'Please enter a valid phone number';
+                      }
+                      return null;
+                    },
+                    ispassword: false,
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(Colors.black),
+                    ),
                     onPressed: () {
-                      // Proceed with ticket purchase
-                      // Redirect to next page
-                      Navigator.pop(context); // Close the bottom sheet
+                      //inittiate stk push
+
+                      // check payment if successfull show the receipt in the next page
+
+                      Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => TicketReceiptPage(
                                   ticket: TicketModel(
                                       description: "",
-                                      time: "",
-                                      title: "",
-                                      price: "",
-                                      imageUrl: "",
-                                      section: "",
-                                      orderNumber: "",
-                                      venue: "",
-                                      date: ""),
+                                      time: "10PM",
+                                      title: widget.event.title,
+                                      price: " Kh 500",
+                                      imageUrl:
+                                          "https://pbs.twimg.com/media/DpkN5pOX4AA5zzt.jpg:large",
+                                      section: "FanZone#3",
+                                      orderNumber: "565656675",
+                                      venue: "Eldoret, Sports Club",
+                                      date: "24, Aug 2024"),
                                 )),
                       );
                     },
-                    child: const Text('Buy'),
+                    child: const Text('Pay'),
                   ),
                 ],
               ),
@@ -91,6 +175,9 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
 
   @override
   Widget build(BuildContext context) {
+    print("PHONE Value=============$_phoneNumber");
+
+    var user = Provider.of<FbAuthProvider>(context).getCurrentUser();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Section'),
@@ -253,16 +340,26 @@ class _BuyTicketPageState extends State<BuyTicketPage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
+                TextButton(
                   onPressed: () {
                     // Check availability and proceed
                     if (selectedFanZone != 0 &&
                         checkAvailability(selectedFanZone)) {
-                      // Proceed with ticket purchase
-                      print('Ticket purchased for FanZone $selectedFanZone');
+                      //check if user is logged in
+                      if (user == null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SignupPage(
+                                      route: BuyTicketPage(
+                                    event: widget.event,
+                                  ))),
+                        );
+                      } else {
+                        buyTicket();
+                      }
                     } else {
-                      // Show error message or handle accordingly
-                      print('FanZone not selected or unavailable');
+                      errortoast('FanZone not selected or unavailable');
                     }
                   },
                   child: const Text('Buy Ticket'),

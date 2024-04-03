@@ -1,16 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class AuthProvider extends ChangeNotifier {
+class FbAuthProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // Sign up with email and password
-  Future<void> signUp({required String email, required String password}) async {
+  Future<User?> signUp(
+      {required String email, required String password}) async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      UserCredential user = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      return user.user;
     } catch (error) {
       print("Error signing up: $error");
       throw error;
@@ -18,12 +21,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Sign in with email and password
-  Future<void> signIn({required String email, required String password}) async {
+  Future<User?> signIn(
+      {required String email, required String password}) async {
     try {
-      await _auth.signInWithEmailAndPassword(
+      UserCredential user = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      return user.user;
     } catch (error) {
       print("Error signing in: $error");
       throw error;

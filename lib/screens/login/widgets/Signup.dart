@@ -1,11 +1,14 @@
 import 'package:event_ticketing_mobile_app/provider/auth.dart';
 import 'package:event_ticketing_mobile_app/provider/signup_pages.dart';
+import 'package:event_ticketing_mobile_app/screens/buyticket_page.dart';
+import 'package:event_ticketing_mobile_app/screens/homescreen/homepage.dart';
 import 'package:event_ticketing_mobile_app/utilities/formfield_widg.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class RegisterWidget extends StatefulWidget {
-  const RegisterWidget({Key? key}) : super(key: key);
+  final dynamic route;
+  const RegisterWidget({super.key, required this.route});
 
   @override
   State<RegisterWidget> createState() => _RegisterWidgetState();
@@ -13,10 +16,6 @@ class RegisterWidget extends StatefulWidget {
 
 class _RegisterWidgetState extends State<RegisterWidget> {
   final _registerFormKey = GlobalKey<FormState>();
-  String _username = '';
-
-  String _phoneNumber = '';
-
   String _email = '';
 
   String _password = '';
@@ -32,17 +31,23 @@ class _RegisterWidgetState extends State<RegisterWidget> {
       setState(() {
         _isloading = true;
       });
-      final formattedPhoneNumber = '+254${_phoneNumber.substring(1)}';
 
-      Provider.of<AuthProvider>(context, listen: false)
+      Provider.of<FbAuthProvider>(context, listen: false)
           .signUp(
         email: _email,
         password: _password,
       )
-          .whenComplete(() {
+          .then((val) {
         setState(() {
           _isloading = false;
         });
+
+        if (val != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => widget.route),
+          );
+        }
       });
     }
   }
@@ -62,42 +67,6 @@ class _RegisterWidgetState extends State<RegisterWidget> {
           ),
           const SizedBox(
             height: 10,
-          ),
-          FormInputField(
-            labelText: 'Username',
-            onchanged: (value) {
-              setState(() {
-                _username = value!;
-              });
-            },
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Please enter a username';
-              }
-              return null;
-            },
-            ispassword: false,
-          ),
-          FormInputField(
-            labelText: 'PhoneNumber',
-            onchanged: (value) {
-              setState(() {
-                _phoneNumber = value!;
-              });
-            },
-            validator: (value) {
-              if (value!.isEmpty) {
-                return 'Please enter a phone number';
-              }
-
-              final phoneRegex = RegExp(r'^[0-9]{10}$');
-
-              if (!phoneRegex.hasMatch(value)) {
-                return 'Please enter a valid phone number';
-              }
-              return null;
-            },
-            ispassword: false,
           ),
           FormInputField(
             labelText: 'Email',

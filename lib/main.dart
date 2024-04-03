@@ -1,14 +1,34 @@
+import 'package:event_ticketing_mobile_app/firebase_options.dart';
+import 'package:event_ticketing_mobile_app/provider/auth.dart';
+import 'package:event_ticketing_mobile_app/provider/mpesa.dart';
 import 'package:event_ticketing_mobile_app/provider/nav_bar.dart';
+import 'package:event_ticketing_mobile_app/provider/signup_pages.dart';
 import 'package:event_ticketing_mobile_app/screens/homescreen/homepage.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(MultiProvider(
       key: ObjectKey(DateTime.now().toString()),
       providers: [
         ChangeNotifierProvider(
+          create: (context) => LoginNavigationProvider(),
+        ),
+        ChangeNotifierProvider(
           create: (context) => NavProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => PaymentProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => FbAuthProvider(),
         ),
       ],
       child: const UserApp()));

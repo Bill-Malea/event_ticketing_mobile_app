@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:barcode/barcode.dart';
 import 'package:event_ticketing_mobile_app/models/ticket_model.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +10,8 @@ class TicketReceiptPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Barcode bc = Barcode.dataMatrix();
+    final svg = bc.toSvg('Hello World!', width: 200, height: 200);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ticket Receipt'),
@@ -37,11 +42,8 @@ class TicketReceiptPage extends StatelessWidget {
               height: 100,
               width: MediaQuery.of(context).size.width,
               color: Colors.grey[200],
-              child: const Center(
-                child: Text(
-                  'Barcode',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
+              child: Center(
+                child: Image.asset(svg),
               ),
             ),
           ],

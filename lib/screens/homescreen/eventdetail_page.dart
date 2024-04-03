@@ -65,7 +65,9 @@ class EventDetailPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => BuyTicketPage()),
+                            builder: (context) => BuyTicketPage(
+                                  event: event,
+                                )),
                       );
                     },
                     child: const Text('Buy Ticket'),

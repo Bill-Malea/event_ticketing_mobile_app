@@ -30,22 +30,26 @@ class _LoginWidgetState extends State<LoginWidget> {
 
       final formattedPhoneNumber = '+254${_phoneNumberOrEmail.substring(1)}';
 
-      Provider.of<AuthProvider>(context, listen: false)
+      Provider.of<FbAuthProvider>(context, listen: false)
           .signIn(
         email: formattedPhoneNumber,
         password: _password,
       )
-          .whenComplete(() {
+          .then((val) {
         setState(() {
           _isloading = false;
         });
+        if (val != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => widget.route),
+          );
+        }
       });
     }
   }
 
-  void signInWithGoogle() {
-    print('Signing in with Google');
-  }
+  void signInWithGoogle() {}
 
   @override
   Widget build(BuildContext context) {
