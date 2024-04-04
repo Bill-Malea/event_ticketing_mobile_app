@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:event_ticketing_mobile_app/utilities/endpoint.dart';
+import 'package:event_ticketing_mobile_app/utilities/toast_util.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -23,12 +24,17 @@ class PaymentProvider extends ChangeNotifier {
   }
 
   Future<String?> initiatePayment(String phoneNumber, dynamic amount) async {
-    print(phoneNumber);
+    final phone = "254${phoneNumber.substring(1)}";
 
     final timeStamp = generateTimestamp();
     final password = generatePassword(shortCode, mpesaPassKey, timeStamp);
     final token = await _getAccessToken();
+    if (token == null) {
+      return null;
+    }
+
     _token = token;
+
     notifyListeners();
 
     final headers = {
@@ -39,14 +45,14 @@ class PaymentProvider extends ChangeNotifier {
       'BusinessShortCode': shortCode,
       'Password': password,
       'Timestamp': timeStamp,
-      'TransactionType': 'CustomerBuyGoodsOnline',
+      'TransactionType': 'CustomerPayBillOnline',
       'Amount': amount,
-      'PartyA': phoneNumber,
-      'PartyB': tillNumber,
-      'PhoneNumber': phoneNumber,
+      'PartyA': phone,
+      'PartyB': shortCode,
+      'PhoneNumber': phone,
       'CallBackURL': callbackApiUrl,
       'AccountReference': 'Payments',
-      'TransactionDesc': 'Ramii customers payment mobile',
+      'TransactionDesc': 'customers payment mobile',
     };
 
     try {
@@ -55,6 +61,9 @@ class PaymentProvider extends ChangeNotifier {
         headers: headers,
         body: json.encode(payload),
       );
+
+      print(
+          "________________********INITIATE PAY RESPONSE**********____________$response");
 
       final responseData = json.decode(response.body);
 
@@ -67,7 +76,7 @@ class PaymentProvider extends ChangeNotifier {
 
       return responseData['CheckoutRequestID'];
     } on SocketException {
-      //errortoast('Check Your Internet Connection and Try Again');
+      errortoast('Check Your Internet Connection and Try Again');
       return null;
     } catch (e) {
       print('++++++initiate pay error++++++ $e');

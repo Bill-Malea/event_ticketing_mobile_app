@@ -1,4 +1,5 @@
 import 'package:event_ticketing_mobile_app/models/event_model.dart';
+import 'package:event_ticketing_mobile_app/provider/auth.dart';
 import 'package:event_ticketing_mobile_app/provider/nav_bar.dart';
 import 'package:event_ticketing_mobile_app/screens/homescreen/widgets/category_item.dart';
 import 'package:event_ticketing_mobile_app/screens/homescreen/widgets/recommended_item.dart';
@@ -22,10 +23,10 @@ class HomePage extends StatelessWidget {
                   const SizedBox(
                     height: 15,
                   ),
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
+                      const Row(
                         children: [
                           Icon(Icons.location_on),
                           SizedBox(width: 8),
@@ -35,7 +36,17 @@ class HomePage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Icon(Icons.menu)
+                      InkWell(
+                          onTap: () {
+                            Provider.of<FbAuthProvider>(context, listen: false)
+                                .signOut();
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 10),
+                            child: const Icon(
+                              Icons.logout_sharp,
+                            ),
+                          ))
                     ],
                   ),
                   TextFormField(
@@ -96,6 +107,10 @@ class HomePage extends StatelessWidget {
                           itemBuilder: (ctx, index) {
                             return RecommendedItem(
                               event: EventModel(
+                                  section: null,
+                                  id: "",
+                                  recommended: true,
+                                  upcoming: true,
                                   description: "",
                                   title: "Burna Boy's Afro Fest",
                                   imageUrl:
@@ -126,13 +141,17 @@ class HomePage extends StatelessWidget {
                           itemBuilder: (ctx, index) {
                             return RecommendedItem(
                               event: EventModel(
+                                  section: null,
+                                  id: "",
                                   description: "",
                                   title: "Burna Boy's Afro Fest",
                                   imageUrl:
                                       "https://pbs.twimg.com/media/DpkN5pOX4AA5zzt.jpg:large",
                                   venue: "Eldoret,Kenya",
                                   time: "10PM",
-                                  date: "20 AUG 2024"),
+                                  date: "20 AUG 2024",
+                                  recommended: true,
+                                  upcoming: true),
                             );
                           })),
                 ],

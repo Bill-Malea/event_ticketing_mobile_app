@@ -1,3 +1,5 @@
+import 'package:event_ticketing_mobile_app/main.dart';
+import 'package:event_ticketing_mobile_app/utilities/toast_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +17,8 @@ class FbAuthProvider extends ChangeNotifier {
 
       return user.user;
     } catch (error) {
-      print("Error signing up: $error");
-      throw error;
+      errortoast(error.toString());
+      return null;
     }
   }
 
@@ -30,18 +32,22 @@ class FbAuthProvider extends ChangeNotifier {
       );
       return user.user;
     } catch (error) {
-      print("Error signing in: $error");
-      throw error;
+      errortoast(error.toString());
+
+      return null;
     }
   }
 
   // Sign out
-  Future<void> signOut() async {
+  signOut() async {
     try {
       await _auth.signOut();
+
+      return HomeScreen();
     } catch (error) {
-      print("Error signing out: $error");
-      throw error;
+      errortoast(error.toString());
+
+      return null;
     }
   }
 

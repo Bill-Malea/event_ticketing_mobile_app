@@ -48,7 +48,12 @@ class _RegisterWidgetState extends State<RegisterWidget> {
             MaterialPageRoute(builder: (context) => widget.route),
           );
         }
+      }).onError((error, stackTrace) {
+        setState(() {
+          _isloading = false;
+        });
       });
+      ;
     }
   }
 

@@ -43,7 +43,11 @@ class _LoginWidgetState extends State<LoginWidget> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => widget.route),
-          );
+          ).onError((error, stackTrace) {
+            setState(() {
+              _isloading = false;
+            });
+          });
         }
       });
     }
@@ -70,7 +74,7 @@ class _LoginWidgetState extends State<LoginWidget> {
               height: 10,
             ),
             FormInputField(
-              labelText: 'PhoneNumber',
+              labelText: 'Email',
               onchanged: (value) {
                 setState(() {
                   _phoneNumberOrEmail = value!;
@@ -78,15 +82,13 @@ class _LoginWidgetState extends State<LoginWidget> {
               },
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Please enter a phone number or email';
+                  return 'Please enter a valid email address';
                 }
 
                 final emailRegex = RegExp(
                     r'^[\w-]+(\.[\w-]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,})$');
-                final phoneRegex = RegExp(r'^[0-9]{10}$');
 
-                if (!emailRegex.hasMatch(value) &&
-                    !phoneRegex.hasMatch(value)) {
+                if (!emailRegex.hasMatch(value)) {
                   return 'Please enter a valid email or a valid phone number';
                 }
 

@@ -20,3 +20,5 @@ const checkPaymentUrl =
 
 const callbackApiUrl =
     'https://ramiikenya-d3346-default-rtdb.firebaseio.com//mpesacallbacks.json';
+
+const firebaseUrl = 'https://nester-d3198-default-rtdb.firebaseio.com';

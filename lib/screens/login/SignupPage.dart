@@ -40,7 +40,7 @@ class _SignupPageState extends State<SignupPage> {
           route: widget.route,
         );
       case 1:
-        return const RegisterWidget(route: widget.route);
+        return RegisterWidget(route: widget.route);
 
       default:
         return Container();
