@@ -1,17 +1,30 @@
 import 'package:event_ticketing_mobile_app/models/event_model.dart';
 import 'package:event_ticketing_mobile_app/provider/auth.dart';
+import 'package:event_ticketing_mobile_app/provider/events_provider.dart';
 import 'package:event_ticketing_mobile_app/provider/nav_bar.dart';
 import 'package:event_ticketing_mobile_app/screens/homescreen/widgets/category_item.dart';
 import 'package:event_ticketing_mobile_app/screens/homescreen/widgets/recommended_item.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<EventProvider>(context, listen: false).fetchEvents();
+  }
 
   @override
   Widget build(BuildContext context) {
     final selectedpage = Provider.of<NavProvider>(context).selectetab;
+    var events = Provider.of<EventProvider>(context).events;
     return Scaffold(
         body: SafeArea(
           child: Container(
@@ -103,22 +116,9 @@ class HomePage extends StatelessWidget {
                       height: MediaQuery.of(context).size.height * .3,
                       child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: 6,
+                          itemCount: events.length,
                           itemBuilder: (ctx, index) {
-                            return RecommendedItem(
-                              event: EventModel(
-                                  section: null,
-                                  id: "",
-                                  recommended: true,
-                                  upcoming: true,
-                                  description: "",
-                                  title: "Burna Boy's Afro Fest",
-                                  imageUrl:
-                                      "https://pbs.twimg.com/media/DpkN5pOX4AA5zzt.jpg:large",
-                                  venue: "Eldoret,Kenya",
-                                  time: "10PM",
-                                  date: "20 AUG 2024"),
-                            );
+                            return RecommendedItem(event: events[index]);
                           })),
 
                   //////////

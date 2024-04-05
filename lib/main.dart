@@ -1,5 +1,6 @@
 import 'package:event_ticketing_mobile_app/firebase_options.dart';
 import 'package:event_ticketing_mobile_app/provider/auth.dart';
+import 'package:event_ticketing_mobile_app/provider/events_provider.dart';
 import 'package:event_ticketing_mobile_app/provider/mpesa.dart';
 import 'package:event_ticketing_mobile_app/provider/nav_bar.dart';
 import 'package:event_ticketing_mobile_app/provider/signup_pages.dart';
@@ -19,6 +20,9 @@ void main() async {
   runApp(MultiProvider(
       key: ObjectKey(DateTime.now().toString()),
       providers: [
+        ChangeNotifierProvider(
+          create: (context) => EventProvider(),
+        ),
         ChangeNotifierProvider(
           create: (context) => TicketProvider(),
         ),

@@ -1,10 +1,19 @@
 import 'dart:convert';
 import 'package:event_ticketing_mobile_app/models/event_model.dart';
 import 'package:event_ticketing_mobile_app/utilities/endpoint.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-class EventProvider {
-  Future<List<EventModel>> fetchEvents() async {
+class EventProvider extends ChangeNotifier {
+  List<EventModel> _events = [];
+  List<EventModel> _recommended = [];
+  List<EventModel> _upcoming = [];
+
+  List<EventModel> get events => [..._events];
+  List<EventModel> get upcoming => [..._upcoming];
+
+  List<EventModel> get recommended => [..._recommended];
+  fetchEvents() async {
     try {
       final response = await http.get(Uri.parse('$firebaseUrl/events.json'));
 
@@ -17,14 +26,16 @@ class EventProvider {
           events.add(event);
         });
 
-        return events;
-      } else {
-        print('Failed to fetch events');
-        return [];
-      }
+        _events = events;
+
+        _upcoming = events.where((event) => event.upcoming).toList();
+
+        _recommended = events.where((event) => event.recommended).toList();
+
+        notifyListeners();
+      } else {}
     } catch (error) {
       print('Error fetching events: $error');
-      return [];
     }
   }
 
